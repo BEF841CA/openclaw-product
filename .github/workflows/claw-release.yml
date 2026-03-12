@@ -13,9 +13,6 @@ jobs:
     permissions:
       packages: write
       contents: read
-    outputs:
-      digest: ${{ steps.build.outputs.digest }}
-      slim-digest: ${{ steps.build-slim.outputs.digest }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -45,7 +42,7 @@ jobs:
       
       - name: Build and push sandbox image
         id: build
-        uses: useblacksmith/build-push-action@v2
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile.sandbox
@@ -53,9 +50,3 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           provenance: false
           push: true
-
-      - name: Clean up Docker build cache and unused resources
-        if: always()
-        run: |
-            echo "🧹 清理 Docker 构建缓存和未使用资源..."
-            docker system prune -a -f
