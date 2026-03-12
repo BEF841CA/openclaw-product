@@ -1,7 +1,7 @@
 name: Claw Release
 
 on:
-    workflow_dispatch:
+  workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
@@ -29,11 +29,14 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}      
 
-      - name: Extract Docker metadata
-        id: meta
+      - name: Extract Docker sandbox metadata
+        id: meta-sandbox
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ github.repository }}/sandbox
+          tags: |
+            latest
+            {{date 'YYYYMMDD'}}
           labels: |
             org.opencontainers.image.commit-date={{commit_date 'YYYY-MM-DD HH:mm:ss'}}
 
@@ -43,33 +46,51 @@ jobs:
         with:
           context: .
           file: ./Dockerfile.sandbox
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta-sandbox.outputs.tags }}
+          labels: ${{ steps.meta-sandbox.outputs.labels }}
           provenance: false
           push: true
 
-      - name: Build and push sandbox image
+      - name: Extract Docker sandbox common metadata
+        id: meta-sandbox-common
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/sandbox
+          tags: |
+            common
+            common-{{date 'YYYYMMDD'}}
+          labels: |
+            org.opencontainers.image.commit-date={{commit_date 'YYYY-MM-DD HH:mm:ss'}}
+
+      - name: Build and push sandbox common image
         id: build-sandbox-common
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile.sandbox-common
-          tags: |
-            common
-            common-{{date 'YYYYMMDD'}}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta-sandbox-common.outputs.tags }}
+          labels: ${{ steps.meta-sandbox-common.outputs.labels }}
           provenance: false
           push: true
 
-      - name: Build and push sandbox image
+      - name: Extract Docker sandbox browser metadata
+        id: meta-sandbox-browser
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/sandbox
+          tags: |
+            browser
+            browser-{{date 'YYYYMMDD'}}
+          labels: |
+            org.opencontainers.image.commit-date={{commit_date 'YYYY-MM-DD HH:mm:ss'}}
+
+      - name: Build and push sandbox browser image
         id: build-sandbox-browser
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile.sandbox-browser
-          tags: |
-            browser
-            browser-{{date 'YYYYMMDD'}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta-sandbox-browser.outputs.tags }}
+          labels: ${{ steps.meta-sandbox-browser.outputs.labels }}
           provenance: false
           push: true
