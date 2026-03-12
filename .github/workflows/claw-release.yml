@@ -29,16 +29,6 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}      
 
-      - name: Build sandbox image
-        id: build-sandbox-local
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./Dockerfile.sandbox
-          tags: openclaw-sandbox:bookworm-slim
-          push: false
-          load: true
-
       - name: Extract Docker sandbox metadata
         id: meta-sandbox
         uses: docker/metadata-action@v5
@@ -58,28 +48,6 @@ jobs:
           file: ./Dockerfile.sandbox
           tags: ${{ steps.meta-sandbox.outputs.tags }}
           labels: ${{ steps.meta-sandbox.outputs.labels }}
-          provenance: false
-          push: true
-
-      - name: Extract Docker sandbox common metadata
-        id: meta-sandbox-common
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ github.repository }}/sandbox
-          tags: |
-            common
-            common-{{date 'YYYYMMDD'}}
-          labels: |
-            org.opencontainers.image.commit-date={{commit_date 'YYYY-MM-DD HH:mm:ss'}}
-
-      - name: Build and push sandbox common image
-        id: build-sandbox-common
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./Dockerfile.sandbox-common
-          tags: ${{ steps.meta-sandbox-common.outputs.tags }}
-          labels: ${{ steps.meta-sandbox-common.outputs.labels }}
           provenance: false
           push: true
 
