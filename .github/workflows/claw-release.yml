@@ -33,10 +33,10 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/openclaw-sandbox
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/sandbox
           tags: |
             latest
-            {{date 'YYYY-MM-DD'}}
+            {{date 'YYYYMMDD'}}
           labels: |
             org.opencontainers.image.commit-date={{commit_date 'YYYY-MM-DD HH:mm:ss'}}
       
