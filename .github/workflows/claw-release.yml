@@ -90,7 +90,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}      
 
       - name: Extract Docker openclaw metadata
-        id: meta
+        id: meta-openclaw
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ github.repository }}/openclaw
@@ -99,12 +99,32 @@ jobs:
             {{date 'YYYYMMDD'}}
 
       - name: Build and push openclaw image
-        id: build
+        id: build-openclaw
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta-openclaw.outputs.tags }}
+          labels: ${{ steps.meta-openclaw.outputs.labels }}
+          provenance: false
+          push: true
+
+      - name: Extract Docker openclaw slim metadata
+        id: meta-openclaw-slim
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}/openclaw
+          tags: |
+            slim
+            slim-{{date 'YYYYMMDD'}}
+
+      - name: Build and push openclaw slim image
+        id: build-openclaw-slim
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile.slim
+          tags: ${{ steps.meta-openclaw-slim.outputs.tags }}
+          labels: ${{ steps.meta-openclaw-slim.outputs.labels }}
           provenance: false
           push: true
