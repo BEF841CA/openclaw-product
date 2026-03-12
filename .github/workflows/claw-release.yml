@@ -29,6 +29,16 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}      
 
+      - name: Build sandbox image
+        id: build-sandbox-local
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile.sandbox
+          tags: openclaw-sandbox:bookworm-slim
+          push: false
+          load: true
+
       - name: Extract Docker sandbox metadata
         id: meta-sandbox
         uses: docker/metadata-action@v5
