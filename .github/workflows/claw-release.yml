@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           repository: 'openclaw/openclaw'
-      
+
       - name: Set up Docker Builder
         uses: docker/setup-buildx-action@v4
 
@@ -34,19 +34,42 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ github.repository }}/sandbox
-          tags: |
-            latest
-            {{date 'YYYYMMDD'}}
           labels: |
             org.opencontainers.image.commit-date={{commit_date 'YYYY-MM-DD HH:mm:ss'}}
-      
+
       - name: Build and push sandbox image
-        id: build
+        id: build-sandbox
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile.sandbox
           tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          provenance: false
+          push: true
+
+      - name: Build and push sandbox image
+        id: build-sandbox-common
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile.sandbox-common
+          tags: |
+            common
+            common-{{date 'YYYYMMDD'}}
+          labels: ${{ steps.meta.outputs.labels }}
+          provenance: false
+          push: true
+
+      - name: Build and push sandbox image
+        id: build-sandbox-browser
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile.sandbox-browser
+          tags: |
+            browser
+            browser-{{date 'YYYYMMDD'}
           labels: ${{ steps.meta.outputs.labels }}
           provenance: false
           push: true
